@@ -24,6 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".data.source.pickimage.PickImageActivity"
+            android:exported="true"
+            android:theme="@style/TransparentCompat"/>
     </application>
 
 </manifest>
