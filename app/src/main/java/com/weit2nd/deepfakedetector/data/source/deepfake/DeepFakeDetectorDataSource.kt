@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import javax.inject.Inject
 
@@ -43,9 +44,16 @@ class DeepFakeDetectorDataSource @Inject constructor(
     }
 
     private fun createSession(): OrtSession {
-        return context.resources.openRawResource(R.raw.model_fp16).use { modelStream ->
-            val modelBytes = modelStream.readBytes()
-            ortEnvironment.createSession(modelBytes)
+        return context.resources.openRawResource(R.raw.model).use { modelStream ->
+            val size = modelStream.available()
+            val buffer = ByteBuffer.allocateDirect(size)
+            val bytes = ByteArray(8192)
+            var read: Int
+            while (modelStream.read(bytes).also { read = it } != -1) {
+                buffer.put(bytes, 0, read)
+            }
+            buffer.rewind()
+            ortEnvironment.createSession(buffer)
         }
     }
 }
