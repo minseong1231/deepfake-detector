@@ -1,6 +1,5 @@
 package com.weit2nd.deepfakedetector.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.weit2nd.deepfakedetector.domain.deepfake.DetectDeepFakeImage
@@ -40,11 +39,20 @@ class MainViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             imageUri = selectedImage,
+                            isLoading = true,
+                            isResultVisible = false,
                         )
                     }
                     selectedImage?.let {
                         val result = detectDeepFakeImage(selectedImage)
-                        Log.d("MainTest", "result: $result")
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                isResultVisible = true,
+                                deepFakePossibility = result.deepFake * 100,
+                                realPossibility = result.real * 100,
+                            )
+                        }
                     }
                 }
             }

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Deepfake Detector</string>
+    <string name="main_deep_fake_possibility">딥페이크 %f%%</string>
+    <string name="main_real_possibility">진짜사진 %f%%</string>
 </resources>
