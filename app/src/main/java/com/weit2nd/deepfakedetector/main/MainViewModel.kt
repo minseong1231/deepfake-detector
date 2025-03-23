@@ -1,7 +1,9 @@
 package com.weit2nd.deepfakedetector.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.weit2nd.deepfakedetector.domain.deepfake.DetectDeepFakeImage
 import com.weit2nd.deepfakedetector.domain.pickimage.PickSingleImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val pickSingleImage: PickSingleImage,
+    private val detectDeepFakeImage: DetectDeepFakeImage,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -38,6 +41,10 @@ class MainViewModel @Inject constructor(
                         it.copy(
                             imageUri = selectedImage,
                         )
+                    }
+                    selectedImage?.let {
+                        val result = detectDeepFakeImage(selectedImage)
+                        Log.d("MainTest", "result: $result")
                     }
                 }
             }

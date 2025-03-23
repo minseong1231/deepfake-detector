@@ -15,7 +15,7 @@ ksp = "1.9.24-1.0.20"
 coil = "2.7.0"
 appcompat = "1.7.0"
 hiltNavigation = "1.2.0"
-onnxRuntime = "1.15.1"
+onnxRuntime = "1.21.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
