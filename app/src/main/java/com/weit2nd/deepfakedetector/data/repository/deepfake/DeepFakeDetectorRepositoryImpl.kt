@@ -10,8 +10,9 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
     private val deepFakeDetectorDataSource: DeepFakeDetectorDataSource,
     private val localImageDataSource: LocalImageDataSource,
 ) : DeepFakeDetectorRepository {
+    // batch, channel, height, width
     private val defaultShape = longArrayOf(
-        1, 3, DEFAULT_IMAGE_SIZE.toLong(), DEFAULT_IMAGE_SIZE.toLong()
+        1, 3, DEFAULT_IMAGE_HEIGHT.toLong(), DEFAULT_IMAGE_WIDTH.toLong()
     )
 
     override suspend fun detectDeepFakeImage(uri: String): DeepFakeResult {
@@ -45,14 +46,20 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
     private suspend fun preprocessBitmapToCHW(uri: String): FloatArray {
         val bitmap = localImageDataSource.getResizedBitmap(
             uri = uri,
-            width = DEFAULT_IMAGE_SIZE,
-            height = DEFAULT_IMAGE_SIZE,
+            width = DEFAULT_IMAGE_WIDTH,
+            height = DEFAULT_IMAGE_HEIGHT,
         )
-        val width = bitmap.width
-        val height = bitmap.height
-        val floatValues = FloatArray(3 * width * height)
-        val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        val floatValues = FloatArray(3 * DEFAULT_IMAGE_SIZE)
+        val pixels = IntArray(DEFAULT_IMAGE_SIZE)
+        bitmap.getPixels(
+            /* pixels = */ pixels,
+            /* offset = */ 0,
+            /* stride = */ DEFAULT_IMAGE_WIDTH,
+            /* x = */ 0,
+            /* y = */ 0,
+            /* width = */ DEFAULT_IMAGE_WIDTH,
+            /* height = */ DEFAULT_IMAGE_HEIGHT,
+        )
 
         for (i in pixels.indices) {
             val pixel = pixels[i]
@@ -60,18 +67,20 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
             val g = ((pixel shr 8) and 0xFF) / 255.0f
             val b = (pixel and 0xFF) / 255.0f
 
-            val x = i % width
-            val y = i / width
-            val idx = y * width + x
+            val x = i % DEFAULT_IMAGE_WIDTH
+            val y = i / DEFAULT_IMAGE_WIDTH
+            val idx = y * DEFAULT_IMAGE_WIDTH + x
 
             floatValues[idx] = r
-            floatValues[1 * width * height + idx] = g
-            floatValues[2 * width * height + idx] = b
+            floatValues[DEFAULT_IMAGE_SIZE + idx] = g
+            floatValues[2 * DEFAULT_IMAGE_SIZE + idx] = b
         }
         return floatValues
     }
 
     companion object {
-        private const val DEFAULT_IMAGE_SIZE = 224
+        private const val DEFAULT_IMAGE_WIDTH = 224
+        private const val DEFAULT_IMAGE_HEIGHT = 224
+        private const val DEFAULT_IMAGE_SIZE = DEFAULT_IMAGE_WIDTH * DEFAULT_IMAGE_HEIGHT
     }
 }
