@@ -30,8 +30,8 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
     private fun FloatArray.toDeepFakeResult(): DeepFakeResult {
         val softmax = softmax(this)
         return DeepFakeResult(
-            deepFake = softmax[0],
-            real = softmax[1],
+            deepFake = softmax[1],
+            real = softmax[0],
         )
     }
 

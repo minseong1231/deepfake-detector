@@ -44,7 +44,7 @@ class DeepFakeDetectorDataSource @Inject constructor(
     }
 
     private fun createSession(): OrtSession {
-        return context.resources.openRawResource(R.raw.model).use { modelStream ->
+        return context.resources.openRawResource(R.raw.model_dima).use { modelStream ->
             val size = modelStream.available()
             val buffer = ByteBuffer.allocateDirect(size)
             val bytes = ByteArray(8192)
