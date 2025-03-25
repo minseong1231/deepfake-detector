@@ -47,12 +47,16 @@ class MainViewModel @Inject constructor(
                         val result = detectDeepFakeImage(selectedImage)
                         _state.update {
                             it.copy(
-                                isLoading = false,
                                 isResultVisible = true,
                                 deepFakePossibility = result.deepFake * 100,
                                 realPossibility = result.real * 100,
                             )
                         }
+                    }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                        )
                     }
                 }
             }
