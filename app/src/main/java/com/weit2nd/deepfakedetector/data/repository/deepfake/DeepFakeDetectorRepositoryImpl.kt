@@ -1,6 +1,5 @@
 package com.weit2nd.deepfakedetector.data.repository.deepfake
 
-import android.util.Log
 import com.weit2nd.deepfakedetector.data.model.DeepFakeResult
 import com.weit2nd.deepfakedetector.data.source.deepfake.DeepFakeDetectorDataSource
 import com.weit2nd.deepfakedetector.data.source.localimage.LocalImageDataSource
@@ -21,8 +20,10 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
             inputTensor = preprocessBitmapToCHW(uri),
             shape = defaultShape,
         )
-        return session.run(mapOf(session.inputNames.first() to tensor)).use {
-            (it[0].value as Array<FloatArray>)[0].toDeepFakeResult()
+        val inputMap = mapOf(session.inputNames.first() to tensor)
+        return session.run(inputMap).use {
+            val logits = (it[0].value as Array<FloatArray>)[0]
+            logits.toDeepFakeResult()
         }
     }
 
