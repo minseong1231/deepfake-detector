@@ -3,7 +3,7 @@ package com.weit2nd.deepfakedetector.data.di
 import android.content.Context
 import com.weit2nd.deepfakedetector.data.repository.deepfake.DeepFakeDetectorRepository
 import com.weit2nd.deepfakedetector.data.repository.deepfake.DeepFakeDetectorRepositoryImpl
-import com.weit2nd.deepfakedetector.data.source.deepfake.DeepFakeDetectorDataSource
+import com.weit2nd.deepfakedetector.data.source.model.OnnxDataSource
 import com.weit2nd.deepfakedetector.data.source.localimage.LocalImageDataSource
 import dagger.Module
 import dagger.Provides
@@ -18,11 +18,11 @@ object DeepFakeModule {
     @Singleton
     @Provides
     fun provideDeepFakeDetectorRepository(
-        deepFakeDetectorDataSource: DeepFakeDetectorDataSource,
+        onnxDataSource: OnnxDataSource,
         localImageDataSource: LocalImageDataSource,
     ): DeepFakeDetectorRepository {
         return DeepFakeDetectorRepositoryImpl(
-            deepFakeDetectorDataSource = deepFakeDetectorDataSource,
+            onnxDataSource = onnxDataSource,
             localImageDataSource = localImageDataSource,
         )
     }
@@ -31,7 +31,7 @@ object DeepFakeModule {
     @Provides
     fun provideDeepFakeDetectorDataSource(
         @ApplicationContext context: Context,
-    ): DeepFakeDetectorDataSource {
-        return DeepFakeDetectorDataSource(context)
+    ): OnnxDataSource {
+        return OnnxDataSource(context)
     }
 }

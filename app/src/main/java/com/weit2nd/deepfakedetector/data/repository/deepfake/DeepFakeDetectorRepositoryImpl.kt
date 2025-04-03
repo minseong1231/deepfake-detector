@@ -1,12 +1,13 @@
 package com.weit2nd.deepfakedetector.data.repository.deepfake
 
+import com.weit2nd.deepfakedetector.R
 import com.weit2nd.deepfakedetector.data.model.DeepFakeResult
-import com.weit2nd.deepfakedetector.data.source.deepfake.DeepFakeDetectorDataSource
+import com.weit2nd.deepfakedetector.data.source.model.OnnxDataSource
 import com.weit2nd.deepfakedetector.data.source.localimage.LocalImageDataSource
 import javax.inject.Inject
 
 class DeepFakeDetectorRepositoryImpl @Inject constructor(
-    private val deepFakeDetectorDataSource: DeepFakeDetectorDataSource,
+    private val onnxDataSource: OnnxDataSource,
     private val localImageDataSource: LocalImageDataSource,
 ) : DeepFakeDetectorRepository {
     // batch, channel, height, width
@@ -15,8 +16,10 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
     )
 
     override suspend fun detectDeepFakeImage(uri: String): DeepFakeResult {
-        val session = deepFakeDetectorDataSource.getSession()
-        val tensor = deepFakeDetectorDataSource.createTenser(
+        val session = onnxDataSource.getSession(
+            modelIdRes = R.raw.model_dima
+        )
+        val tensor = onnxDataSource.createTenser(
             inputTensor = preprocessBitmapToCHW(uri),
             shape = defaultShape,
         )

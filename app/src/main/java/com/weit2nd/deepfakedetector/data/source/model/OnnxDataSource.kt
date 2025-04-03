@@ -1,9 +1,10 @@
-package com.weit2nd.deepfakedetector.data.source.deepfake
+package com.weit2nd.deepfakedetector.data.source.model
 
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import android.content.Context
+import androidx.annotation.RawRes
 import com.weit2nd.deepfakedetector.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,7 @@ import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import javax.inject.Inject
 
-class DeepFakeDetectorDataSource @Inject constructor(
+class OnnxDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private val mutex = Mutex()
@@ -22,10 +23,14 @@ class DeepFakeDetectorDataSource @Inject constructor(
     private val sessionInitDispatcher = Dispatchers.IO.limitedParallelism(1)
     private val ortEnvironment = OrtEnvironment.getEnvironment()
 
-    suspend fun getSession(): OrtSession = withContext(sessionInitDispatcher) {
+    suspend fun getSession(
+        @RawRes modelIdRes: Int,
+    ): OrtSession = withContext(sessionInitDispatcher) {
         mutex.withLock {
             session ?: run {
-                val newSession = createSession()
+                val newSession = createSession(
+                    modelIdRes = modelIdRes,
+                )
                 session = newSession
                 newSession
             }
@@ -43,8 +48,10 @@ class DeepFakeDetectorDataSource @Inject constructor(
         )
     }
 
-    private fun createSession(): OrtSession {
-        return context.resources.openRawResource(R.raw.model_dima).use { modelStream ->
+    private fun createSession(
+        @RawRes modelIdRes: Int,
+    ): OrtSession {
+        return context.resources.openRawResource(modelIdRes).use { modelStream ->
             val size = modelStream.available()
             val buffer = ByteBuffer.allocateDirect(size)
             val bytes = ByteArray(8192)
