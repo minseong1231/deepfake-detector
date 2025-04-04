@@ -2,8 +2,9 @@ package com.weit2nd.deepfakedetector.data.repository.deepfake
 
 import com.weit2nd.deepfakedetector.R
 import com.weit2nd.deepfakedetector.data.model.DeepFakeResult
-import com.weit2nd.deepfakedetector.data.source.model.OnnxDataSource
 import com.weit2nd.deepfakedetector.data.source.localimage.LocalImageDataSource
+import com.weit2nd.deepfakedetector.data.source.model.OnnxDataSource
+import com.weit2nd.deepfakedetector.data.util.softmax
 import javax.inject.Inject
 
 class DeepFakeDetectorRepositoryImpl @Inject constructor(
@@ -31,20 +32,11 @@ class DeepFakeDetectorRepositoryImpl @Inject constructor(
     }
 
     private fun FloatArray.toDeepFakeResult(): DeepFakeResult {
-        val softmax = softmax(this)
+        val softmax = this.softmax()
         return DeepFakeResult(
             deepFake = softmax[1],
             real = softmax[0],
         )
-    }
-
-    private fun softmax(logits: FloatArray): FloatArray {
-        val maxLogit = logits.maxOrNull() ?: 0f
-        val exps = logits.map { Math.exp((it - maxLogit).toDouble()) }
-        val sumExp = exps.sum()
-        return exps.map {
-            (it / sumExp).toFloat()
-        }.toFloatArray()
     }
 
     private suspend fun preprocessBitmapToCHW(uri: String): FloatArray {
