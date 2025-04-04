@@ -5,7 +5,7 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import android.content.Context
 import androidx.annotation.RawRes
-import com.weit2nd.deepfakedetector.R
+import com.weit2nd.deepfakedetector.data.util.TokenizerBridge
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -13,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
+import java.nio.LongBuffer
 import javax.inject.Inject
 
 class OnnxDataSource @Inject constructor(
@@ -46,6 +47,36 @@ class OnnxDataSource @Inject constructor(
             /* data = */ FloatBuffer.wrap(inputTensor),
             /* shape = */ shape,
         )
+    }
+
+    suspend fun createTenser(
+        inputTensor: LongArray,
+        shape: LongArray,
+    ) = withContext(Dispatchers.IO) {
+        OnnxTensor.createTensor(
+            /* env = */ ortEnvironment,
+            /* data = */ LongBuffer.wrap(inputTensor),
+            /* shape = */ shape,
+        )
+    }
+
+
+
+    suspend fun createToken(
+        @RawRes tokenizerJsonRes: Int,
+        sentence: String,
+    ): LongArray = withContext(Dispatchers.IO) {
+        val json = context.resources
+            .openRawResource(tokenizerJsonRes)
+            .bufferedReader()
+            .use { it.readText() }
+        TokenizerBridge.tokenize(
+            clipTokenizerJson = json,
+            input = sentence,
+        ).split(',')
+            .map {
+                it.trim().toLong()
+            }.toLongArray()
     }
 
     private fun createSession(
