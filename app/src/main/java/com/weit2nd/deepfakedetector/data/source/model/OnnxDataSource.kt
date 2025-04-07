@@ -23,16 +23,22 @@ class OnnxDataSource @Inject constructor(
     private var session: OrtSession? = null
     private val sessionInitDispatcher = Dispatchers.IO.limitedParallelism(1)
     private val ortEnvironment = OrtEnvironment.getEnvironment()
+    private var loadedModelId: Int? = null
 
     suspend fun getSession(
         @RawRes modelIdRes: Int,
     ): OrtSession = withContext(sessionInitDispatcher) {
         mutex.withLock {
+            if (modelIdRes != loadedModelId) {
+                session = null
+                loadedModelId = null
+            }
             session ?: run {
                 val newSession = createSession(
                     modelIdRes = modelIdRes,
                 )
                 session = newSession
+                loadedModelId = modelIdRes
                 newSession
             }
         }
