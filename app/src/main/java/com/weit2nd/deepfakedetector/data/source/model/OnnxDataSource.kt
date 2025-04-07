@@ -11,7 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.nio.ByteBuffer
+import java.io.File
+import java.io.FileOutputStream
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 import javax.inject.Inject
@@ -85,16 +86,16 @@ class OnnxDataSource @Inject constructor(
     private fun createSession(
         @RawRes modelIdRes: Int,
     ): OrtSession {
-        return context.resources.openRawResource(modelIdRes).use { modelStream ->
-            val size = modelStream.available()
-            val buffer = ByteBuffer.allocateDirect(size)
-            val bytes = ByteArray(8192)
-            var read: Int
-            while (modelStream.read(bytes).also { read = it } != -1) {
-                buffer.put(bytes, 0, read)
-            }
-            buffer.rewind()
-            ortEnvironment.createSession(buffer)
+        val file = File(context.cacheDir, "model.onnx")
+        if (file.exists()) {
+            file.delete()
         }
+        val tempFile = File.createTempFile("model", ".onnx", context.cacheDir)
+        context.resources.openRawResource(modelIdRes).use { input ->
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output)
+            }
+        }
+        return ortEnvironment.createSession(tempFile.absolutePath)
     }
 }
