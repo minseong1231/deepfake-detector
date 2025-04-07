@@ -2,6 +2,8 @@ package com.weit2nd.deepfakedetector.data.repository.emotion
 
 import ai.onnxruntime.OnnxTensor
 import com.weit2nd.deepfakedetector.R
+import com.weit2nd.deepfakedetector.data.model.EmotionLabel
+import com.weit2nd.deepfakedetector.data.model.EmotionResult
 import com.weit2nd.deepfakedetector.data.source.model.OnnxDataSource
 import com.weit2nd.deepfakedetector.data.util.softmax
 import java.nio.LongBuffer
@@ -10,7 +12,7 @@ import javax.inject.Inject
 class EmotionRepositoryImpl @Inject constructor(
     private val onnxDataSource: OnnxDataSource,
 ) : EmotionRepository {
-    override suspend fun getEmotion(sentence: String): String {
+    override suspend fun getEmotion(sentence: String): List<EmotionResult> {
         val session = onnxDataSource.getSession(
             modelIdRes = R.raw.model_emotion
         )
@@ -35,8 +37,12 @@ class EmotionRepositoryImpl @Inject constructor(
         )
         val result = session.run(inputMap)
         val output = (result[0].value as Array<FloatArray>).first().softmax()
-        // TODO: 4/4/25 (minseong1231) 결과를 예쁘게 후처리
-        return ""
+        return output.mapIndexed { index, probability ->
+            EmotionResult(
+                label = EmotionLabel.entries[index],
+                probability = probability,
+            )
+        }
     }
 
     private suspend fun createAttentionTensor(
