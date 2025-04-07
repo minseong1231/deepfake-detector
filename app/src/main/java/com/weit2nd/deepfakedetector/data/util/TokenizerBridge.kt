@@ -5,5 +5,5 @@ object TokenizerBridge {
         System.loadLibrary("clip_tokenizer")
     }
 
-    external fun tokenize(clipTokenizerJson: String, input: String): String
+    external fun tokenize(clipTokenizerJson: String, input: String): LongArray
 }

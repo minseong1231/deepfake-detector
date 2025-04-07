@@ -73,10 +73,7 @@ class OnnxDataSource @Inject constructor(
         TokenizerBridge.tokenize(
             clipTokenizerJson = json,
             input = sentence,
-        ).split(',')
-            .map {
-                it.trim().toLong()
-            }.toLongArray()
+        )
     }
 
     private fun createSession(
